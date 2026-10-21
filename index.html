@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>区块链大赛在线练习题库</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Microsoft YaHei','Segoe UI',sans-serif;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);min-height:100vh;color:#fff}
+.container{max-width:900px;margin:0 auto;padding:20px}
+h1{text-align:center;padding:30px 0 10px;font-size:2em;background:linear-gradient(90deg,#00d2ff,#3a7bd5);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#8892b0;margin-bottom:30px;font-size:.95em}
+.category-select{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;margin-bottom:30px}
+.cat-btn{padding:12px 24px;border:2px solid #3a7bd5;background:rgba(58,123,213,.1);color:#7eb8ff;border-radius:12px;cursor:pointer;font-size:1em;transition:.3s}
+.cat-btn:hover,.cat-btn.active{background:linear-gradient(135deg,#3a7bd5,#00d2ff);color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 5px 20px rgba(58,123,213,.4)}
+.type-select{display:flex;gap:10px;justify-content:center;margin-bottom:25px;flex-wrap:wrap}
+.type-btn{padding:8px 20px;border:1px solid #444;background:rgba(255,255,255,.05);color:#aaa;border-radius:8px;cursor:pointer;font-size:.9em;transition:.3s}
+.type-btn:hover,.type-btn.active{background:rgba(0,210,255,.15);color:#00d2ff;border-color:#00d2ff}
+.progress-bar{background:rgba(255,255,255,.1);border-radius:20px;height:8px;margin-bottom:20px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#00d2ff,#3a7bd5);border-radius:20px;transition:width .5s}
+.stats{display:flex;justify-content:space-between;margin-bottom:15px;color:#8892b0;font-size:.9em}
+.question-card{background:rgba(255,255,255,.05);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:16px;padding:30px;margin-bottom:20px;animation:fadeIn .4s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+.q-number{color:#00d2ff;font-size:.85em;margin-bottom:10px;font-weight:bold}
+.q-text{font-size:1.1em;line-height:1.8;margin-bottom:20px;white-space:pre-wrap}
+.options{display:flex;flex-direction:column;gap:10px}
+.option{padding:14px 18px;border:1px solid rgba(255,255,255,.15);border-radius:10px;cursor:pointer;transition:.3s;display:flex;align-items:flex-start;gap:10px;line-height:1.6}
+.option:hover:not(.disabled){background:rgba(58,123,213,.15);border-color:#3a7bd5;transform:translateX(5px)}
+.option .key{min-width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.85em;flex-shrink:0}
+.option.correct{background:rgba(0,200,83,.15);border-color:#00c853;animation:pulse .4s}
+.option.correct .key{background:#00c853;color:#fff}
+.option.wrong{background:rgba(255,23,68,.15);border-color:#ff1744}
+.option.wrong .key{background:#ff1744;color:#fff}
+.option.show-correct{background:rgba(0,200,83,.1);border-color:#00c853}
+.option.show-correct .key{background:#00c853;color:#fff}
+.option.disabled{cursor:default;opacity:.7}
+.option.disabled:hover{transform:none}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.02)}}
+.result-msg{margin-top:15px;padding:12px 18px;border-radius:10px;font-size:.95em;line-height:1.6;animation:fadeIn .3s}
+.result-msg.right{background:rgba(0,200,83,.1);border:1px solid rgba(0,200,83,.3);color:#69f0ae}
+.result-msg.fail{background:rgba(255,23,68,.1);border:1px solid rgba(255,23,68,.3);color:#ff8a80}
+.next-btn{margin-top:15px;padding:10px 30px;background:linear-gradient(135deg,#3a7bd5,#00d2ff);border:none;color:#fff;border-radius:8px;cursor:pointer;font-size:1em;transition:.3s}
+.next-btn:hover{transform:translateY(-2px);box-shadow:0 5px 15px rgba(58,123,213,.4)}
+.score-panel{text-align:center;padding:40px;background:rgba(255,255,255,.05);border-radius:16px;border:1px solid rgba(255,255,255,.1)}
+.score-panel h2{font-size:1.8em;margin-bottom:15px;color:#00d2ff}
+.score-panel .score{font-size:3em;font-weight:bold;background:linear-gradient(90deg,#00d2ff,#3a7bd5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin:20px 0}
+.score-panel p{color:#8892b0;margin:8px 0}
+.restart-btn{margin-top:25px;padding:12px 40px;background:linear-gradient(135deg,#3a7bd5,#00d2ff);border:none;color:#fff;border-radius:10px;cursor:pointer;font-size:1.1em;transition:.3s}
+.restart-btn:hover{transform:translateY(-2px);box-shadow:0 5px 20px rgba(58,123,213,.4)}
+.multi-hint{color:#ffb74d;font-size:.85em;margin-bottom:10px}
+.confirm-btn{margin-top:12px;padding:8px 24px;background:linear-gradient(135deg,#ff9800,#f57c00);border:none;color:#fff;border-radius:8px;cursor:pointer;font-size:.95em;transition:.3s}
+.confirm-btn:hover{transform:translateY(-1px);box-shadow:0 3px 10px rgba(255,152,0,.4)}
+.wrong-book-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:2px solid #ff5722;background:rgba(255,87,34,.1);color:#ff8a65;border-radius:12px;cursor:pointer;font-size:1em;transition:.3s;margin:0 8px 15px}
+.wrong-book-btn:hover{background:linear-gradient(135deg,#ff5722,#ff9800);color:#fff;border-color:transparent;transform:translateY(-2px);box-shadow:0 5px 20px rgba(255,87,34,.4)}
+.wrong-book-btn .badge{background:#ff1744;color:#fff;border-radius:50%;min-width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:.8em;font-weight:bold}
+.wrong-list{display:flex;flex-direction:column;gap:15px}
+.wrong-item{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;animation:fadeIn .3s}
+.wrong-item .wq-text{font-size:1em;line-height:1.7;margin-bottom:12px}
+.wrong-item .wo-opts{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.wrong-item .wo-opt{padding:8px 14px;border-radius:8px;display:flex;align-items:flex-start;gap:8px;font-size:.9em;line-height:1.5}
+.wrong-item .wo-opt.is-correct{background:rgba(0,200,83,.1);border:1px solid rgba(0,200,83,.3)}
+.wrong-item .wo-opt.is-wrong{background:rgba(255,23,68,.1);border:1px solid rgba(255,23,68,.3)}
+.wrong-item .wo-opt .key{min-width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;font-size:.8em;flex-shrink:0}
+.wrong-item .wo-opt.is-correct .key{background:#00c853;color:#fff}
+.wrong-item .wo-opt.is-wrong .key{background:#ff1744;color:#fff}
+.wrong-item .wo-opt.neutral{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08)}
+.wrong-item .wo-opt.neutral .key{background:rgba(255,255,255,.1)}
+.wrong-meta{display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);font-size:.85em;color:#8892b0}
+.wrong-meta .your-ans{color:#ff8a80}
+.wrong-meta .correct-ans{color:#69f0ae}
+.remove-wrong{padding:5px 14px;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.05);color:#aaa;border-radius:6px;cursor:pointer;font-size:.8em;transition:.3s}
+.remove-wrong:hover{background:rgba(0,200,83,.15);color:#69f0ae;border-color:#00c853}
+.empty-wrong{text-align:center;padding:60px 20px;color:#8892b0}
+.empty-wrong .icon{font-size:3em;margin-bottom:15px}
+.clear-all-btn{padding:8px 20px;border:1px solid #ff1744;background:rgba(255,23,68,.1);color:#ff8a80;border-radius:8px;cursor:pointer;font-size:.85em;transition:.3s;margin-top:15px}
+.clear-all-btn:hover{background:#ff1744;color:#fff}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>区块链大赛在线练习题库</h1>
+<p class="subtitle">选择答案后立即判断对错 | 答对自动跳转下一题 | 答错显示正确答案 | 支持错题复习</p>
+<div id="app"></div>
+</div>
+<script>
+const questions={
+"题2_单选":[
+{q:"如果想要在全局包中使用全局变量，则全局变量必须（  ）",o:["首字母必须大写","首字母必须小写","必须加上const关键字","必须加上var关键词"],a:[0]},
+{q:"下列有关变量的说法正确的有（  ）",o:["函数内定义的变量称为全局变量","函数外定义的变量称为局部变量","函数定义中的变量称为形式参数","同一作用域下可存在相同变量名"],a:[2]},
+{q:"在函数体内声明的变量称之为（  ）",o:["局部变量","全局变量","形式参数","自有变量"],a:[0]},
+{q:"声明变量的一般形式是使用哪个关键字（  ）",o:["var","const","string","int"],a:[0]},
+{q:"关于Go赋值运算符 -= ，下列说法是正确的是（  ）",o:["相加后再赋值","赋值后再相加","相减后再赋值","赋值后再相减"],a:[2]},
+{q:"Go语言中用于包声明语句的关键字是（  ）",o:["main","Public","break","package"],a:[3]},
+{q:"关于被私有访问控制符private修饰的成员变量，以下说法正确的是（ ）",o:["可以被三种类所引用：该类自身、与它在同一个包中的其他类、在其他包中的该类的子类","可以被两种类访问和引用：该类本身、该类的所有子类","只能被该类自身所访问和修改","只能被同一个包中的类访问"],a:[2]},
+{q:"Go浮点类型 float64 默认值为（  ）",o:["0","0.0","0.00","00.00"],a:[0]},
+{q:"下列哪个不是solidity的循环方式()",o:["for","for.....in","while","do......while"],a:[1]},
+{q:"下列关于for循环和while循环的说法中哪个是正确的？()",o:["while循环能实现的操作，for循环也都能实现","while循环判断条件一般是程序结果，for循环判断条件一般是非程序结果","两种循环任何时候都可替换","两种循环结构中都必须有循环体，循环体不能为空"],a:[0]},
+{q:"uint a=10;uint b=2; function getint() public view returns(uint){ uint sum=a**b+3%2;return sum; }",o:["98","99","100","101"],a:[3]},
+{q:"谁的存储区数据位置的成本较高（）",o:["Storage","Memory","Calldata","Stack"],a:[0]},
+{q:"下面哪个是正确的接口表示方式？",o:["interface test{ function test() external returns ();}","interface test{ function test() external returns (uint256)}","interface test{ function test() external returns (uint256);}","interface test{ function test() returns (uint256);}"],a:[2]},
+{q:"下面四个变量声明语句中，哪一个变量的命名是正确的？",o:["uint for;","uint txt_name;","uint myname myval;","uint 2s;"],a:[1]},
+{q:"下面这些能进行输入和输出的语句是（）",o:["function test(uint _a, uint _b) pure{}","function test(uint _a, uint _b) return(){}","function test(uint _a, uint _b) public returns(uint _sum){}","function test(uint _a, uint _b) public return(uint _sum){}"],a:[2]},
+{q:"当字节类型转换成字符串类型时需要使用哪一个API",o:["strconv.Atoi(num)","strconv.Itoa(num)","[]byte(str)","string(str[:])"],a:[3]},
+{q:"当字符串转换为int整数时需要使用哪一个API（  ）",o:["strconv.Atoi(num)","strconv.Itoa(num)","String(num)","int(num)"],a:[0]},
+{q:"下列关于条件语句的说法中正确的是",o:["if语句中有then保留字","if语句中可以没有else保留字","if语句中只能有一个elseif分句","if语句都可以由iif语句替代"],a:[1]},
+{q:"下面哪一个不是Solidity运算符？",o:["=","==","&&","$#"],a:[3]},
+{q:"当字符串类型转换字节类型时需要使用哪一个API（  ）",o:["strconv.Atoi(num)","strconv.Itoa(num)","[]byte(str)","string(str[:])"],a:[2]}
+],
+"题2_多选":[
+{q:"下列关于关键词解释中说法正确的是（  ）",o:["func：用于定义函数和方法","var和const：变量和常量的声明","struct：用于定义抽象数据类型","map用于声明自定义类型"],a:[0,1,2,3]},
+{q:"下列关于if 条件语句说法正确的有（  ）",o:["if 语句 由一个布尔表达式后紧跟一个或多个语句组成。","if 在布尔表达式为 true 时，其后紧跟的语句块执行，如果为 false 则不执行。","if条件语句需要开发者通过指定一个或多个条件，并通过测试条件是否为 true 来决定是否执行指定语句，并在条件为 false 的情况在执行另外的语句。","if 条件语句可以通过 &&逻辑与 ||逻辑或 ！逻辑非，判断表达式。"],a:[0,1,2,3]},
+{q:"关于包文件引用说法正确的是（  ）",o:["包的引用路径有两种写法， 一种是绝对路径，另一种是相对路径。","需要使用 import 关键字导入使用的包。","在导入包的时候，可以为导入的包设置别名。","在导入包的时候，可以使用匿名引用格式。"],a:[0,1,2,3]},
+{q:"下列关于Go字符串类型的描述正确的有（  ）",o:["字符串是一个或多个字符(字母，数字，符号)的序列。","字符串是一种值类型，且值不可变。","字符串所占的字节长度可以通过函数 len() 来获取。","字符串的内容（纯字节）可以通过标准索引法来获取，在方括号[ ]内写入索引，索引从 1 开始计数。"],a:[0,1,2]},
+{q:"下列关于Go 语言包下的函数方法调用说法正确的有（  ）",o:["同一个包中调用函数，函数名定义没有特定要求","不同包调用函数或者变量时，函数名定义必须以大写字典开头","Go不同文件夹（包）之间的相互引用靠包来实现，也就是import","大写意味着这个函数/变量是私有的，包外部不能访问。"],a:[0,1,2]},
+{q:"下列关于结构体的定义说法正确的有（  ）",o:["Go语言中通过 结构体（ struct ） 来实现面向对象。","结构体是一种聚合的数据类型，是由零个或多个任意类型的值聚合成的实体。","Go语言提供了一种自定义数据类型，可以封装多个基本数据类型，这种数据类型叫结构体，英文名称 struct 。","每个值称为结构体的成员。"],a:[0,1,2,3]},
+{q:"下列关于切片的声明方式说法正确的有哪些（  ）",o:["slice:=make([]int,5)","slice:=make([]int,5,10)","slice:=[]int{1,2,3,4,5}","slice:=[]int{4:1}"],a:[0,1,2,3]},
+{q:"关于Go格式化输出表达正确的说法有（  ）",o:["Print 系列函数会将内容输出到系统的标准输出。","Print 函数直接输出内容。","Println 函数会在输出内容的结尾添加一个换行符。","Printf 函数支持格式化输出字符串。"],a:[0,1,2,3]},
+{q:"Go 语言不定函数参数的正确使用说法有哪些（  ）",o:["所有的不定参数类型必须是相同的。","不定参数必须是函数的最后一个参数。","不定参数在函数体内相当于一个切片，对切片的操作同样适合对不定参数的操作。","切片也可以作为参数传递给不定参数，切片名称后面要加上\"...\"。"],a:[0,1,2,3]},
+{q:"在Go语言中以下运算符优先级最低和优先级最高的是（）和（）。",o:["==","&&","++","&"],a:[1,2]}
+],
+"题2_判断":[
+{q:"一个指针变量指向了一个值的内存地址。",o:["对","错"],a:[0]},
+{q:"Go语言数组是具有相同类型的一组长度固定的数据序列。",o:["对","错"],a:[0]},
+{q:"切片（slice）是对数组一个连续片段的引用，所以切片是一个引用类型。",o:["对","错"],a:[0]},
+{q:"一个函数可以没有返回值，也可以有一个返回值，也可以有返回多个值。",o:["对","错"],a:[0]},
+{q:"go语言数组遍历有两种形式，一种是使用for…range循环遍历数组，一种是使用常规for循环遍历数组。",o:["对","错"],a:[0]},
+{q:"map是一种无序的基于key-value的数据结构，用于存储一系列无序的键值对。",o:["对","错"],a:[0]},
+{q:"一个函数被调用后，返回给调用处的执行结果，叫做函数的返回值。",o:["对","错"],a:[0]},
+{q:"函数是Go里面的核心设计，它通过关键字func来声明。",o:["对","错"],a:[0]},
+{q:"有一种自定义数据类型可以封装多个基本数据类型，这种数据类型叫结构体",o:["对","错"],a:[0]},
+{q:"new和make是go语言中的关键字之一。",o:["对","错"],a:[1]},
+{q:"结构体访问成员，使用点号 . 操作符。",o:["对","错"],a:[0]},
+{q:"一个变量（常量、类型或函数）在程序中都有一定的作用范围，称之为作用域。",o:["对","错"],a:[0]},
+{q:"Go函数支持不定数目的形式参数，不定参数声明使用argumentName ...Type的语法格式。",o:["对","错"],a:[0]},
+{q:"结构体的嵌套，一个结构体中可以嵌套包含另一个结构体或结构体指针。",o:["对","错"],a:[0]},
+{q:"数组元素可以通过索引下标（位置）来读取或者修改元素数据。",o:["对","错"],a:[0]}
+],
+"题3_单选":[
+{q:"关于 main 函数，下面说法错误的是（）",o:["main 函数能带参数","main () 函数只能声明在 main 包中，不能声明在其他包中","main 函数不能定义返回值","main 函数中可以使用 flag 包来获取和解析命令行参数"],a:[0]},
+{q:"在Go语言编辑器中单行注释的快捷键是什么（ ）",o:["Ctrl + /","Ctrl +Shift + /","Ctrl + C","Ctrl + D"],a:[0]},
+{q:"关于Go赋值运算符-=，下列说法是正确的是（ ）",o:["相加后再赋值","赋值后再相加","相减后再赋值","赋值后再相减"],a:[2]},
+{q:"下列有关变量的说法正确的有（ ）",o:["函数内定义的变量称为全局变量","函数外定义的变量称为局部变量","函数定义中的变量称为形式参数","同一作用域下可存在相同变量名"],a:[2]},
+{q:"uint a=10;uint b=2;function geti() public view returns(uint){ uint sum=a*b+3%2;return sum;}",o:["98","99","100","101"],a:[3]},
+{q:"分析下面的代码段，输出结果是（）bool _a;function getBool() public view returns(bool){ return _a;}",o:["true","false","0","\"null\""],a:[1]},
+{q:"下面哪个是正确的接口表示方式？",o:["interface test{ function test() external returns ();}","interface test{ function test() external returns (uint256)}","interface test{function test() external returns (uint256);}","interface test{ function test() returns (uint256);}"],a:[2]},
+{q:"下列哪个不是solidity的循环方式()",o:["for","for......in","while","do......while"],a:[1]},
+{q:"下面哪一个表达式的返回值为true？",o:["!(3<=1)","(1!=2)&&(2<0)","!(20>3)","(5!=3)&&(50<10)"],a:[0]},
+{q:"下面四个变量声明语句中，哪一个变量的命名是正确的？",o:["uint for;","uint txt_name;","uint myname myval;","uint 2s;"],a:[1]},
+{q:"下面这些能进行输入和输出的语句是（ ）",o:["function test(uint _a,uint _b) pure{}","function test(uint _a, uint _b) return(){}","function test(uint _a,uint _b) public returns(uint _sum){}","function test(uint _a, uint _b) public return(uint _sum){}"],a:[2]},
+{q:"下列哪个是抽象合约",o:["function test() external returns (uint){}","function test() external returns (uint){}","function test() external returns{}","function test() external returns (uint);"],a:[3]},
+{q:"下面的solidity语句书写正确的是",o:["function hello returns(uint){}","function hello(uint i) return(uint){}","function hello(uint i) public returns(uint){}","function hello(uint i) returns{}"],a:[2]},
+{q:"读取下面代码段，溢出的值是（）uint8 i=0x90;uint8 j=0x70; uint8 k;return k=i+j;",o:["0","1","2","\"null\""],a:[1]},
+{q:"若i,j已定义为uint类型,则以下程序段中内循环体的总的执行次数是（）for (i=5;i--) for (j=0;j<4;j++)...",o:["20","25","24","30"],a:[0]},
+{q:"下列关于条件语句的说法中正确的是",o:["if语句中有then保留字","if语句中可以没有else保留字","if语句中只能有一个elseif分句","if语句都可以由if语句替代"],a:[1]},
+{q:"关于被私有访问控制符private修饰的成员变量，以下说法正确的是",o:["可以被三种类所引用：该类自身、与它在同一个包中的其他类、在其他包中的该类的子类","可以被两种类访问和引用：该类本身、该类的所有子类","只能被该类自身所访问和修改","只能被同一个包中的类访问"],a:[2]},
+{q:"谁的存储区数据位置的成本较高（）",o:["Storage","Memory","Calldata","Stack"],a:[0]},
+{q:"下列关于for循环和while循环的说法中哪个是正确的？",o:["while循环能实现的操作，for循环也都能实现","while循环判断条件一般是程序结果，for循环判断条件一般是非程序结果","两种循环任何时候都可替换","两种循环结构中都必须有循环体，循环体不能为空"],a:[0]},
+{q:"下面哪一个不是Solidity运算符？",o:["=","==","&&","$#"],a:[3]}
+],
+"题3_多选":[
+{q:"下列选项中关于标识符规则说法正确的是（ ）",o:["标识符用来命名变量、类型等程序实体。","一个标识符实际上就是一个或是多个字母(A~Z 和 a~z)数字(0~9)、下划线 组成的序列。","第一个字符必须是字母或下划线或数字。","关键词可以作为标识符使用。"],a:[0,1]},
+{q:"下列属于Go 语言内置的运算符的有（ ）",o:["算术运算符","关系运算符","逻辑运算符","位运算符"],a:[0,1,2,3]},
+{q:"下列Go中关于布尔类型说法正确的有（ ）",o:["布尔类型可取值只有两个：true / false","bool 类型占 1 个字节","bool能和byte或int8相互转换","bool类型占1个字符"],a:[0,1]},
+{q:"下列关于循环语句说法正确的有（ ）",o:["重复执行的代码被称为循环体语句。","当反复执行这个循环体时，需要在合适的时候把循环判断条件修改为false，从而结束循环。","如果不结束循环，循环将一直执行下去，形成死循环。","条件判断语句：用于表示循环反复执行的条件。"],a:[0,1,2,3]},
+{q:"下列关于Go字符串类型的描述正确的有（ ）",o:["字符串是一个或多个字符(字母，数字，符号)的序列。","字符串是一种值类型，且值不可变。","字符串所占的字节长度可以通过函数 len() 来获取。","字符串的内容（纯字节）可以通过标准索引法来获取，在方括号[]内写入索引，索引从1开始计数。"],a:[0,1,2]},
+{q:"下列关于结构体的定义说法正确的有（ ）",o:["Go语言中通过 结构体（struct）来实现面向对象。","结构体是一种聚合的数据类型，是由零个或多个任意类型的值聚合成的实体。","Go语言提供了一种自定义数据类型，可以封装多个基本数据类型，这种数据类型叫结构体，英文名称 struct。","每个值称为结构体的成员。"],a:[0,1,2,3]},
+{q:"下列关于Go 语言包下的函数方法调用说法正确的有（ ）",o:["同一个包中调用函数，函数名定义没有特定要求","不同包调用函数或者变量时，函数名定义必须以大写字典开头","Go不同文件夹（包）之间的相互引用靠包来实现，也就是import","大写意味着这个函数/变量是私有的，包外部不能访问。"],a:[0,1,2]},
+{q:"Go 语言不定函数参数的正确使用说法有哪些（ ）",o:["所有的不定参数类型必须是相同的。","不定参数必须是函数的最后一个参数。","不定参数在函数体内相当于一个切片，对切片的操作同样适合对不定参数的操作。","切片也可以作为参数传递给不定参数，切片名称后面要加上\"...\"。"],a:[0,1,2,3]},
+{q:"关于Go格式化输出表达正确的说法有（ ）",o:["Print 系列函数会将内容输出到系统的标准输出。","Print 函数直接输出内容。","Println 函数会在输出内容的结尾添加一个换行符。","Printf 函数支持格式化输出字符串。"],a:[0,1,2,3]},
+{q:"以下哪个选项是Solidity的特点？",o:["运行环境是在去中心化的网络上","支持支付，关键字是payable","需要一个特殊的address类型","数据每个状态可以永久存储","操作不可逆，具有原子性"],a:[0,1,2,3,4]}
+],
+"题3_判断":[
+{q:"map是一种无序的基于key-value的数据结构，用于存储一系列无序的键值对。",o:["对","错"],a:[0]},
+{q:"有一种自定义数据类型可以封装多个基本数据类型，这种数据类型叫结构体",o:["对","错"],a:[0]},
+{q:"结构体访问成员，使用点号.操作符。",o:["对","错"],a:[0]},
+{q:"一个函数被调用后，返回给调用处的执行结果，叫做函数的返回值。",o:["对","错"],a:[0]},
+{q:"函数是Go里面的核心设计，它通过关键字func来声明。",o:["对","错"],a:[0]},
+{q:"切片（slice）是对数组一个连续片段的引用，所以切片是一个引用类型。",o:["对","错"],a:[0]},
+{q:"Go函数支持不定数目的形式参数，不定参数声明使用argumentName ...Type的语法格式。",o:["对","错"],a:[0]},
+{q:"一个指针变量指向了一个值的内存地址。",o:["对","错"],a:[0]},
+{q:"在主机终端输入 Go env 命令，可以查看Golang安装的环境变量。",o:["对","错"],a:[0]},
+{q:"Go语言数组是具有相同类型的一组长度固定的数据序列。",o:["对","错"],a:[0]},
+{q:"new和make是go语言中的关键字之一。",o:["对","错"],a:[1]},
+{q:"一个函数可以没有返回值，也可以有一个返回值，也可以有返回多个值。",o:["对","错"],a:[0]},
+{q:"布尔类型 bool 默认值为True。",o:["对","错"],a:[1]},
+{q:"一个变量（常量、类型或函数）在程序中都有一定的作用范围，称之为作用域。",o:["对","错"],a:[0]},
+{q:"关系运算符的结果都是 bool 型。",o:["对","错"],a:[0]}
+],
+"综合练习_单选":[
+{q:"谁的存储区数据位置的成本较高（）",o:["Storage","Memory","Calldata","Stack"],a:[0]},
+{q:"Solidity中存储在区块链中的数据的存储位置是（ ）",o:["Storage","Memory","Calldata","Stack"],a:[0]},
+{q:"分析下面的代码段，输出结果是（ ）\nbool _a; function getBool() public view returns(bool){ return _a; }",o:["true","false","0","\"null\""],a:[1]},
+{q:"下面这些能进行输入和输出的语句是（ ）",o:["function test(uint _a, uint _b) pure()","function test(uint _a, uint _b) return()()","function test(uint _a, uint _b) public returns(uint _sum)()","function test(uint _a, uint _b) public return(uint _sum)()"],a:[2]},
+{q:"声明变量的一般形式是使用哪个关键字（ ）",o:["var","const","string","int"],a:[0]},
+{q:"Solidity中ABI是智能合约（）",o:["交易数据","公共接口的描述","编码规则","编译日志"],a:[1]},
+{q:"整数类型 int 默认值为（ ）",o:["0","0.0","1","1.0"],a:[0]},
+{q:"下面的solidity语句书写正确的是",o:["function hello returns(uint) {}","function hello(uint i) return(uint) {}","function hello(uint i) public returns(uint) {}","function hello(uint i) returns()"],a:[2]},
+{q:"Go语言中用于包声明语句的关键字是（ ）",o:["main","Public","break","package"],a:[3]},
+{q:"在函数体内声明的变量称之为（ ）",o:["局部变量","全局变量","形式参数","自有变量"],a:[0]},
+{q:"读取下面代码段，溢出的值是（ ）\nuint8 i=0x90; uint8 j=0x70; uint8 k; return k=i+j;",o:["0","1","2","\"null\""],a:[1]},
+{q:"下列关于for循环和while循环的说法中哪个是正确的？",o:["while循环能实现的操作，for循环也都能实现","while循环判断条件一般是程序结果，for循环判断条件一般是非程序结果","两种循环任何时候都可替换","两种循环结构中都必须有循环体，循环体不能为空"],a:[0]},
+{q:"若i, j已定义为uint类型, 则以下程序段中内循环体的总的执行次数是（ ）\nfor (i = 5; i; i--) for (j = 0; j < 4; j++){...}",o:["20","25","24","30"],a:[0]},
+{q:"当字符串类型转换字节类型时需要使用哪一个API（ ）",o:["strconv.Atoi(num)","strconv.Itoa(num)","[]byte(str)","string(str[:])"],a:[2]},
+{q:"下面哪一个表达式的返回值为true？",o:["!(3<=1)","(1!=2)&&(2<0)","!(20>3)","(5!=3)&&(50<10)"],a:[0]},
+{q:"当字符串转换为int整数时需要使用哪一个API（ ）",o:["strconv.Atoi(num)","strconv.Itoa(num)","String(num)","int(num)"],a:[0]},
+{q:"下面哪个是正确的接口表示方式？",o:["interface test{ function test() external returns (); }","interface test{ function test() external returns (uint256)}","interface test{ function test() external returns (uint256); }","interface test{ function test() returns (uint256);}"],a:[2]},
+{q:"当字节类型转换成字符串类型时需要使用哪一个API",o:["strconv.Atoi(num)","strconv.Itoa(num)","[]byte(str)","string(str[:])"],a:[3]},
+{q:"下面关于os.Args说法是否正确: 变量os.Args作为一个字符串切片，可以理解它是一个动态容量的顺序数组，可以通过os.Args[i]来访问单个元素",o:["正确","错误"],a:[0]},
+{q:"下列哪个是抽象合约",o:["function test() external returns (uint) {}","function test() external returns (uint) {}","function test() external returns {}","function test() external returns (uint);"],a:[3]}
+],
+"综合练习_多选":[
+{q:"Go 语言不定函数参数的正确使用说法有哪些（ ）",o:["所有的不定参数类型必须是相同的","不定参数必须是函数的最后一个参数","不定参数在函数体内相当于一个切片，对切片的操作同样适合对不定参数的操作","切片也可以作为参数传递给不定参数，切片名称后面要加上\"...\""],a:[0,1,2,3]},
+{q:"struct可以使用（）作为成员",o:["数组","映射","函数","合约"],a:[0,1]},
+{q:"两个合约之间交互的方式有哪些？",o:["重载","调用","继承","修改"],a:[1,2]},
+{q:"下列关于Go 语言包下的函数方法调用说法正确的有（ ）",o:["同一个包中调用函数，函数名定义没有特定要求","不同包调用函数或者变量时，函数名定义必须以大写字典开头","Go不同文件夹（包）之间的相互引用靠包来实现，也就是import","大写意味着这个函数/变量是私有的，包外部不能访问"],a:[0,1,2]},
+{q:"EVM的内存分成了哪些部分？",o:["Stack","Storage","Memory","Calldata"],a:[1,2,3]},
+{q:"以下哪些是Solidity智能合约中的值类型？",o:["布尔类型","映射","数组","枚举"],a:[0,3]},
+{q:"关于以太坊区块链存储机制的说法，下面正确的有哪些？",o:["以太坊的区块主要由区块头和交易组成","区块在存储的过程中分别将区块头和交易体经过 RLP 编码后存入至 KV 数据当中","以太坊在数据存储的过程中，每个 value 对应的 key 都有相对应的前缀，不同类型的 value 对应不同的前缀","每个区块的数据（区块头和区块里的所有交易）都会序列成字节码的形式写入 dat 文件中"],a:[0,1,2]},
+{q:"区块链运行所需要的基础数据基础都有哪些？",o:["配置数据对象","区块链核心数据","事务核心数据","合约配置对象"],a:[0,1]},
+{q:"关于Go语言Gob编码原理，下面说法正确的是",o:["gob是Golang包自带的一个数据结构序列化的编码/解码工具","编码使用Encoder","解码使用Decoder","序列化的实质就是流化，数据转成字节流"],a:[0,1,2,3]},
+{q:"Solidity合约中包含哪些类型的函数？",o:["构造函数","fallback函数","view函数","修改合约状态的函数"],a:[0,1,2,3]}
+],
+"综合练习_判断":[
+{q:"结构体的嵌套，一个结构体中可以嵌套包含另一个结构体或结构体指针",o:["对","错"],a:[0]},
+{q:"go语言数组遍历有两种形式，一种是使用for...range循环遍历数组，一种是使用常规for循环遍历数组",o:["对","错"],a:[0]},
+{q:"一个函数被调用后，返回给调用处的执行结果，叫做函数的返回值",o:["对","错"],a:[0]},
+{q:"函数是Go里面的核心设计，它通过关键字func来声明",o:["对","错"],a:[0]},
+{q:"一个指针变量指向了一个值的内存地址",o:["对","错"],a:[0]},
+{q:"将多个合约定义放入单个Solidity文件中是完全正确的",o:["对","错"],a:[0]},
+{q:"Solidity支持多继承，但不支持方法重载",o:["对","错"],a:[0]},
+{q:"智能合约的执行是免费的",o:["对","错"],a:[1]},
+{q:"钱包可分为中心化钱包和去中心化钱包",o:["对","错"],a:[0]},
+{q:"构造函数是特殊的函数，在部署合约的时候，就会被调用",o:["对","错"],a:[0]},
+{q:"Flag包的主要用途就是用来接受命令行参数的",o:["对","错"],a:[0]},
+{q:"bytes和string不是数组类型",o:["对","错"],a:[1]},
+{q:"在对称加密算法中，数据发信方将明文(原始数据) 和加密密钥一起经过特殊加密算法处理后，使其变成复杂的加密密文发送出去",o:["对","错"],a:[0]},
+{q:"os.Args的类型是 []string",o:["对","错"],a:[0]},
+{q:"数组元素可以通过索引下标（位置）来读取或者修改元素数据",o:["对","错"],a:[0]}
+]
+};
+
+const keys='ABCD';
+const app=document.getElementById('app');
+let state={category:null,type:null,idx:0,correct:0,wrong:0,total:0,answered:false,selected:new Set(),mode:'normal',wrongBook:[]};
+
+// ===== 题目乱序 =====
+function shuffle(arr){
+  const a=[...arr];
+  for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}
+  return a;
+}
+// 页面加载时打乱每个小类的题目顺序
+Object.keys(questions).forEach(k=>{questions[k]=shuffle(questions[k]);});
+
+// ===== 错题本 localStorage =====
+function loadWrongBook(){try{return JSON.parse(localStorage.getItem('wrongBook')||'[]');}catch(e){return[];}}
+function saveWrongBook(book){localStorage.setItem('wrongBook',JSON.stringify(book));}
+function addToWrongBook(q,userAns,src){
+  let book=loadWrongBook();
+  const entry={q:q.q,o:q.o,a:q.a,userAns:userAns,src:src,ts:Date.now()};
+  // 避免重复添加同一道题
+  const exists=book.some(e=>e.q===entry.q&&e.src===entry.src);
+  if(!exists){book.push(entry);saveWrongBook(book);}
+}
+function removeFromWrongBook(idx){
+  let book=loadWrongBook();book.splice(idx,1);saveWrongBook(book);
+}
+function clearWrongBook(){
+  if(confirm('确定清空所有错题记录吗？')){saveWrongBook([]);renderWrongBook();}
+}
+function getWrongBookCount(){return loadWrongBook().length;}
+
+function getCategories(){return[...new Set(Object.keys(questions).map(k=>k.split('_')[0]))];}
+function getTypes(cat){return[...new Set(Object.keys(questions).filter(k=>k.startsWith(cat+'_')).map(k=>k.split('_')[1]))];}
+function getKey(){return state.category+'_'+state.type;}
+function getQuestions(){return questions[getKey()]||[];}
+
+function renderHome(){
+  state={category:null,type:null,idx:0,correct:0,wrong:0,total:0,answered:false,selected:new Set(),mode:'normal'};
+  const cats=getCategories();
+  const wrongCount=getWrongBookCount();
+  let h='<div class="category-select"><div class="cat-btn active" onclick="selectCategory(\'全部\')">全部题库</div>';
+  cats.forEach(c=>{h+=`<div class="cat-btn" onclick="selectCategory('${c}')">${c}</div>`;});
+  h+=`<div class="wrong-book-btn" onclick="renderWrongBook()">📝 错题本 <span class="badge">${wrongCount}</span></div>`;
+  h+='</div><div id="typeArea"></div><div id="quizArea"></div>';
+  app.innerHTML=h;
+  selectCategory('全部');
+}
+
+function selectCategory(cat){
+  state.category=cat;
+  document.querySelectorAll('.cat-btn').forEach(b=>{b.classList.toggle('active',b.textContent===cat||(cat==='全部'&&b.textContent==='全部题库'));});
+  const typeArea=document.getElementById('typeArea');
+  if(cat==='全部'){
+    typeArea.innerHTML='<div class="type-select"><div class="type-btn active" onclick="selectType(\'全部\')">全部题型</div><div class="type-btn" onclick="selectType(\'单选\')">单选</div><div class="type-btn" onclick="selectType(\'多选\')">多选</div><div class="type-btn" onclick="selectType(\'判断\')">判断</div></div><div id="quizArea"></div>';
+  }else{
+    const types=getTypes(cat);
+    let h='<div class="type-select"><div class="type-btn active" onclick="selectType(\'全部\')">全部题型</div>';
+    types.forEach(t=>{h+=`<div class="type-btn" onclick="selectType('${t}')">${t}</div>`;});
+    h+='</div><div id="quizArea"></div>';
+    typeArea.innerHTML=h;
+  }
+  state.type='全部';
+  startQuiz();
+}
+
+function selectType(t){
+  state.type=t;
+  document.querySelectorAll('.type-btn').forEach(b=>{b.classList.toggle('active',b.textContent===t);});
+  startQuiz();
+}
+
+function getFilteredQuestions(){
+  if(state.category==='全部'&&state.type==='全部'){
+    let all=[];
+    Object.values(questions).forEach(arr=>all=all.concat(arr));
+    return all;
+  }
+  if(state.category==='全部'){
+    let all=[];
+    Object.keys(questions).filter(k=>k.endsWith('_'+state.type)).forEach(k=>all=all.concat(questions[k]));
+    return all;
+  }
+  if(state.type==='全部'){
+    let all=[];
+    Object.keys(questions).filter(k=>k.startsWith(state.category+'_')).forEach(k=>all=all.concat(questions[k]));
+    return all;
+  }
+  return questions[getKey()]||[];
+}
+
+function startQuiz(){
+  state.idx=0;state.correct=0;state.wrong=0;state.answered=false;state.selected=new Set();
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const qs=getFilteredQuestions();
+  state.total=qs.length;
+  if(state.idx>=qs.length){renderResult();return;}
+  const q=qs[state.idx];
+  const isMulti=q.a.length>1;
+  const pct=((state.idx)/qs.length*100).toFixed(0);
+  let h=`<div class="stats"><span>第 ${state.idx+1} / ${qs.length} 题</span><span>✅ ${state.correct} 正确 | ❌ ${state.wrong} 错误</span></div>`;
+  h+=`<div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>`;
+  h+=`<div class="question-card"><div class="q-number">${isMulti?'【多选题】':'【'+(q.o.length===2&&q.o[0]==='对'?'判断题':'单选题')+'】'} 第${state.idx+1}题</div>`;
+  h+=`<div class="q-text">${escHtml(q.q)}</div>`;
+  if(isMulti)h+=`<div class="multi-hint">💡 本题为多选题，选择所有正确选项后点击"确认"提交</div>`;
+  h+=`<div class="options">`;
+  q.o.forEach((opt,i)=>{
+    h+=`<div class="option" id="opt${i}" onclick="selectOption(${i})"><div class="key">${keys[i]}</div><div>${escHtml(opt)}</div></div>`;
+  });
+  h+=`</div>`;
+  if(isMulti)h+=`<button class="confirm-btn" id="confirmBtn" onclick="confirmMulti()">确认提交</button>`;
+  h+=`<div id="resultArea"></div></div>`;
+  app.querySelector('#quizArea').innerHTML=h;
+  state.answered=false;
+  state.selected=new Set();
+}
+
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function selectOption(i){
+  if(state.answered)return;
+  const qs=getFilteredQuestions();
+  const q=qs[state.idx];
+  const isMulti=q.a.length>1;
+  if(isMulti){
+    if(state.selected.has(i))state.selected.delete(i);else state.selected.add(i);
+    document.querySelectorAll('.option').forEach((el,idx)=>{
+      el.style.background=state.selected.has(idx)?'rgba(58,123,213,.2)':'';
+      el.style.borderColor=state.selected.has(idx)?'#3a7bd5':'';
+    });
+  }else{
+    checkAnswer([i]);
+  }
+}
+
+function confirmMulti(){
+  if(state.answered||state.selected.size===0)return;
+  checkAnswer([...state.selected].sort());
+}
+
+function checkAnswer(selected){
+  state.answered=true;
+  const qs=getFilteredQuestions();
+  const q=qs[state.idx];
+  const correct=q.a;
+  const isCorrect=selected.length===correct.length&&selected.every(v=>correct.includes(v));
+  document.querySelectorAll('.option').forEach((el,i)=>{
+    el.classList.add('disabled');
+    if(correct.includes(i))el.classList.add('show-correct');
+    if(selected.includes(i)&&!correct.includes(i))el.classList.add('wrong');
+    if(selected.includes(i)&&correct.includes(i)){el.classList.remove('show-correct');el.classList.add('correct');}
+  });
+  const confirmBtn=document.getElementById('confirmBtn');
+  if(confirmBtn)confirmBtn.style.display='none';
+  const ra=document.getElementById('resultArea');
+  if(isCorrect){
+    state.correct++;
+    ra.innerHTML=`<div class="result-msg right">✅ 回答正确！${state.idx<qs.length-1?'0.5秒后自动进入下一题...':''}</div>`;
+    if(state.idx<qs.length-1)setTimeout(()=>{state.idx++;renderQuestion();},500);
+  }else{
+    state.wrong++;
+    const ansStr=correct.map(i=>keys[i]).join('');
+    // 记录错题
+    const userAnsStr=selected.map(i=>keys[i]).join('');
+    const src=state.mode==='wrongbook'?('错题本_'+(state.idx+1)):(getKey()+'_'+(state.idx+1));
+    addToWrongBook(q,selected,src);
+    ra.innerHTML=`<div class="result-msg fail">❌ 回答错误！正确答案是：<strong>${ansStr}</strong>（已记入错题本）</div><button class="next-btn" onclick="state.idx++;renderQuestion();">下一题 →</button>`;
+  }
+}
+
+function renderResult(){
+  const pct=state.total>0?(state.correct/state.total*100).toFixed(1):0;
+  let emoji=pct>=90?'🏆':pct>=70?'👍':pct>=50?'💪':'📚';
+  app.querySelector('#quizArea').innerHTML=`<div class="score-panel"><h2>${emoji} 练习完成！</h2><div class="score">${pct}分</div><p>共 ${state.total} 题</p><p>✅ 正确 ${state.correct} 题 | ❌ 错误 ${state.wrong} 题</p><button class="restart-btn" onclick="startQuiz()">再来一次</button><br><button class="restart-btn" style="margin-top:10px;background:linear-gradient(135deg,#6366f1,#8b5cf6)" onclick="renderHome()">返回选择</button></div>`;
+  const pb=app.querySelector('.progress-bar');if(pb)pb.innerHTML='<div class="progress-fill" style="width:100%"></div>';
+}
+
+// ===== 错题复习模式 =====
+function renderWrongBook(){
+  state.mode='wrongbook';
+  const book=loadWrongBook();
+  const qa=document.getElementById('quizArea');
+  const ta=document.getElementById('typeArea');
+  if(ta)ta.innerHTML='';
+  if(book.length===0){
+    qa.innerHTML=`<div class="question-card"><div class="empty-wrong"><div class="icon">🎉</div><h2 style="color:#69f0ae;margin-bottom:10px">暂无错题</h2><p>太棒了！还没有记录任何错题。</p><br><button class="restart-btn" onclick="renderHome()">返回首页</button></div></div>`;
+    return;
+  }
+  let h=`<div class="stats"><span>📝 错题本 共 ${book.length} 题</span><span><button class="clear-all-btn" onclick="clearWrongBook()">清空错题</button></span></div>`;
+  h+=`<div class="wrong-list">`;
+  book.forEach((item,idx)=>{
+    const isJudge=item.o.length===2&&item.o[0]==='对';
+    const typeLabel=isJudge?'判断题':(item.a.length>1?'多选题':'单选题');
+    h+=`<div class="wrong-item"><div class="q-number">【${typeLabel}】来源：${escHtml(item.src)}</div>`;
+    h+=`<div class="wq-text">${idx+1}. ${escHtml(item.q)}</div>`;
+    h+=`<div class="wo-opts">`;
+    item.o.forEach((opt,oi)=>{
+      const isCorrectOpt=item.a.includes(oi);
+      const isUserWrong=item.userAns.includes(oi)&&!isCorrectOpt;
+      let cls=isCorrectOpt?'is-correct':(isUserWrong?'is-wrong':'neutral');
+      h+=`<div class="wo-opt ${cls}"><div class="key">${keys[oi]}</div><div>${escHtml(opt)}</div></div>`;
+    });
+    h+=`</div>`;
+    h+=`<div class="wrong-meta">`;
+    h+=`<span>你的答案：<span class="your-ans">${item.userAns.map(i=>keys[i]).join('')}</span> | 正确答案：<span class="correct-ans">${item.a.map(i=>keys[i]).join('')}</span></span>`;
+    h+=`<button class="remove-wrong" onclick="removeFromWrongBook(${idx});renderWrongBook();">✓ 已掌握</button>`;
+    h+=`</div></div>`;
+  });
+  h+=`</div>`;
+  h+=`<div style="text-align:center;margin-top:20px"><button class="restart-btn" onclick="renderHome()">返回首页</button></div>`;
+  qa.innerHTML=h;
+}
+
+renderHome();
+</script>
+</body>
+</html>
